@@ -1,0 +1,121 @@
+{% extends 'saler/base.html' %}
+{% load static %}
+{% block title %}Trang Bán Hàng{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/saler/dashboard.css' %}">
+
+<div class="dashboard-container container">
+    <div class="card revenue-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
+                <h5 class="revenue-card-title">Doanh thu hôm nay</h5>
+                <p class="revenue-card-text">{{ daily_revenue }} VND</p>
+            </div>
+            <a class="btn btn-primary create-order-btn " href="{% url 'saler_make_order' %}">
+                <i class="fas fa-plus mr-2"></i>
+                Tạo đơn hàng
+            </a>
+        </div>
+    </div>
+    <!-- Tabs Section -->
+    <div class="card card-tabs-container">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="dashboardTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="products-tab" data-toggle="tab" href="#products" role="tab">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="orders-tab" data-toggle="tab" href="#orders" role="tab">Đơn hàng</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body tab-content-container">
+            <div class="tab-content" id="dashboardTabsContent">
+                
+                <!-- Products Tab -->
+                <div class="tab-pane fade show active" id="products" role="tabpanel">
+                    <h5 class="card-title">Quản lý Sản phẩm</h5>
+                    <form method="GET" class="d-flex justify-content-between">
+
+                    <div class="d-flex w-100">
+                        <input type="text" name="search" class="form-control ms-1" placeholder="Tìm kiếm sản phẩm..." value="{{ request.GET.search }}" style="flex: 8;">
+                        <button type="submit" class="btn btn-info ml-4" style="flex: 2;">Tìm kiếm</button>
+                    </div>
+
+                    </form>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ảnh</th>
+                                    <th>Tên Sản Phẩm</th>
+                                    <th>Loại Bánh</th>
+                                    <th>Hương Vị</th>
+                                    <th>Giá</th>
+                                    <th>Còn Hàng</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td><img src="{{ product.image_url }}" alt="{{ product.name }}" class="img-fluid" style="max-width: 100px;"></td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.category }}</td>
+                                    <td>{{ product.flavor }}</td>
+                                    <td>{{ product.price }} VNĐ</td>
+                                    <td>
+                                        {% if product.availability %}
+                                            Còn hàng
+                                        {% else %}
+                                            Hết hàng
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'edit_product' product.id %}" class="btn btn-info btn-sm">Còn hàng</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Orders Tab -->
+                <div class="tab-pane fade" id="orders" role="tabpanel">
+                    <h5 class="card-title">Quản lý Đơn hàng</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn hàng</th>
+                                    <th>Số lượng</th>
+                                    <th>Tổng giá</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Trạng thái</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.item_count }}</td>
+                                    <td>{{ order.total_order_price }}</td>
+                                    <td>{{ order.date_ordered }}</td>
+                                    <td>{{ order.status }}</td>
+                                    <td>
+                                        {% comment %} <a href="{% url 'detail_order' order.id %}" class="btn btn-info btn-sm">Xem</a> {% endcomment %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

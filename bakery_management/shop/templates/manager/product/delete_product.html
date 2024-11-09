@@ -1,0 +1,38 @@
+{% extends 'manager/base.html' %}
+
+{% block title %}Xóa Sản Phẩm{% endblock %}
+
+{% block content %}
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Xóa Sản Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <h4>Bạn có chắc chắn muốn xóa sản phẩm này?</h4>
+                <h5 class="text-danger">{{ product.name }}</h5>
+                <p class="text-muted">Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        var myModal = new bootstrap.Modal(document.getElementById('deleteModal'), {
+            keyboard: false
+        });
+        myModal.show();
+    }
+</script>
+{% endblock %}

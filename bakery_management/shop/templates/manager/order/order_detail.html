@@ -1,0 +1,243 @@
+{% extends 'manager/base.html' %}
+
+{% block title %}Chi Tiết Đơn Hàng{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="text-center mb-4">Chi Tiết Đơn Hàng #{{ order.id }}</h2>
+
+            <!-- Order Details -->
+            <div class="mb-3">
+                <strong>Trạng Thái:</strong> {{ order.status }}
+            </div>
+            <div class="mb-3">
+                <strong>Ngày Tạo:</strong> {{ order.order_date|date:"d/m/Y H:i" }}
+            </div>
+            <div class="mb-3">
+                <strong class="total-price-label">Tổng Giá Trị:</strong> <span class="total-price">{{ order.total_price }} VNĐ</span>
+            </div>
+            
+
+            <!-- Payment and Cancel Buttons -->
+            {% if order.status == 'pending' %}
+                <div class="text-center mt-4">
+                    <button class="btn btn-success btn-lg" id="payment-btn">Thanh Toán</button>
+                    <button class="btn btn-danger btn-lg ml-3" id="cancel-btn">Hủy Đơn Hàng</button>
+                </div>
+            {% endif %}
+
+            <!-- Product List -->
+            <h3 class="mt-4">Danh Sách Sản Phẩm</h3>
+            <div style="overflow-x: auto; overflow-y: auto; max-height: 400px;">
+                <table class="table table-striped table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Giá</th>
+                            <th>Số Lượng</th>
+                            <th>Tổng Giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order_items %}
+                            <tr>
+                                <td><img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="img-fluid" style="max-width: 100px;"></td>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.price }} VNĐ</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.total_price }} VNĐ</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">Không có sản phẩm nào trong đơn hàng.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal" tabindex="-1" id="success-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông Báo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .total-price-label {
+        font-size: 1.5rem;
+        color: #007bff;   
+        font-weight: bold;
+    }
+    .total-price {
+        font-size: 1.5rem;
+        color: #007bff;   
+    }
+    .container {
+        margin-top: 50px;
+    }
+    .card {
+        border-radius: 10px;
+    }
+    .card-body {
+        padding: 30px;
+    }
+    h2, h3 {
+        color: #333;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+
+    }
+    .btn {
+        width: 200px;
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+    .ml-3 {
+        margin-left: 1rem;
+    }
+
+    /* Modal Styles */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-dialog {
+        max-width: 500px;
+        margin: 30px auto;
+        border-radius: 10px;
+    }
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #fff;
+    }
+    .modal-header {
+        background-color: #28a745;
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    .btn-close {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: white;
+    }
+    .modal-body {
+        padding: 20px;
+        font-size: 1rem;
+        color: #333;
+    }
+    .modal-footer {
+        background-color: #f8f9fa;
+        border-radius: 0 0 10px 10px;
+    }
+    .btn-primary {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-primary:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+</style>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const orderId = {{ order.id }};
+
+        document.getElementById('payment-btn').addEventListener('click', function() {
+            fetch(`/api/orders/pay/${orderId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.detail === "Payment successful") {
+                    showModal("Thanh toán thành công!");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showModal("Có lỗi xảy ra khi thanh toán.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showModal("Có lỗi xảy ra khi thanh toán.");
+            });
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            fetch(`/api/orders/cancel/${orderId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.detail === "Order canceled successfully") {
+                    showModal("Đơn hàng đã bị hủy.");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showModal("Có lỗi xảy ra khi hủy đơn hàng.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showModal("Có lỗi xảy ra khi hủy đơn hàng.");
+            });
+        });
+
+        function showModal(message) {
+            const modalMessage = document.getElementById('modal-message');
+            modalMessage.innerText = message;
+            const modal = new bootstrap.Modal(document.getElementById('success-modal'));
+            modal.show();
+        }
+    });
+</script>
+
+{% endblock %}

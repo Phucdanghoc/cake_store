@@ -1,0 +1,114 @@
+{% extends 'manager/base.html' %}
+{% load static %}
+{% block title %}Danh Sách Sản Phẩm{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manager/product_list.css' %}">
+
+<div class="container">
+    <div class="card ">
+        <div class="card-body">
+            <h2 class="text-center mb-4  text-dark">Danh Sách Sản Phẩm</h2>
+
+            <!-- Thanh tìm kiếm -->
+            <div class="mb-3">
+                <form method="GET" class="d-flex justify-content-between">
+                    <div class="d-flex w-100">
+                        <input type="text" name="search" class="form-control ms-1" placeholder="Tìm kiếm sản phẩm..." value="{{ request.GET.search }}" style="flex: 8;">
+                        <button type="submit" class="btn btn-danger ml-4" style="flex: 2;">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+            
+            
+
+            <!-- Nút thêm sản phẩm -->
+            <div class="text-end mb-3">
+                <a href="{% url 'add_product' %}" class="btn btn-success">Thêm Sản Phẩm</a>
+            </div>
+
+            <!-- Bảng sản phẩm -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Loại Bánh</th>
+                            <th>Hương Vị</th>
+                            <th>Giá</th>
+                            <th>Còn Hàng</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td><img src="{{ product.image_url }}" alt="{{ product.name }}" class="img-fluid" style="max-width: 100px;"></td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>{{ product.flavor }}</td>
+                                <td>{{ product.price }} VNĐ</td>
+                                <td>
+                                    {% if product.availability %}
+                                        Còn hàng
+                                    {% else %}
+                                        Hết hàng
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'edit_product' product.id %}" class="btn btn-warning btn-sm">Sửa</a>
+                                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger btn-sm">Xóa</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">Không có sản phẩm nào.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if products.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Trang {{ products.number }} / {{ products.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if products.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.paginator.num_pages }}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

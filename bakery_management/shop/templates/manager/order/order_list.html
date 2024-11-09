@@ -1,0 +1,103 @@
+{% extends 'manager/base.html' %}
+{% load static %}
+
+{% block title %}Danh Sách Đơn Hàng{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manager/product_list.css' %}">
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="text-center mb-4 text-dark">Danh Sách Đơn Hàng</h2>
+
+            <!-- Thanh tìm kiếm -->
+            <div class="mb-3">
+                <form method="GET" class="d-flex justify-content-between">
+                    <div class="d-flex w-100">
+                        <input type="text" name="search" class="form-control ms-1" placeholder="Tìm kiếm đơn hàng..." value="{{ request.GET.search }}" style="flex: 8;">
+                        <button type="submit" class="btn btn-danger ml-4" style="flex: 2;">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Bảng đơn hàng -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã Đơn Hàng</th>
+                            <th>Tổng Tiền</th>
+                            <th>Ngày Tạo</th>
+                            <th>Trạng Thái</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.total_price }} VNĐ</td>
+                                <td>{{ order.order_date|date:"m:H d/m/Y" }}</td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        Chờ xác nhận
+                                    {% elif order.status == 'paid' %}
+                                        Đã thanh toán
+                                    {% else %}
+                                        Đã hủy
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'order_detail' order.id %}" class="btn btn-warning btn-sm text-white">Chi Tiết</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Không có đơn hàng nào.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if orders.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Trang {{ orders.number }} / {{ orders.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if orders.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.paginator.num_pages }}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

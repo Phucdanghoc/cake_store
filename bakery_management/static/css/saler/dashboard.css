@@ -1,0 +1,73 @@
+.dashboard-container {
+    max-height: 500px;
+    padding-top: 20px;
+}
+.revenue-card {
+    margin-bottom: 1.5rem;
+}
+img{
+    width: 100px;
+    height: 100px;
+}
+.revenue-card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+.revenue-card-text {
+    font-size: 1.15rem;
+    color: #4caf50; 
+}
+.card-tabs-container {
+    margin-top: 1.5rem;
+}
+.row {
+    display: flex;
+}
+
+.col-md-6 {
+    display: flex;
+    align-items: stretch;
+}
+.revenue-card,
+.order-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px; 
+}
+.create-order-btn {
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+.create-order-btn i {
+    margin-right: 0.5rem;
+}
+.create-order-btn:hover {
+    background-color: #0056b3;
+}
+.tab-content-container {
+    min-width: 300px;
+    max-height: 400px;
+    padding-top: 15px;
+}
+.table-responsive {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.table {
+    display: block;
+}
+.table th, .table td {
+    white-space: nowrap;
+    text-align: left;
+}
+.search-bar {
+    margin-bottom: 1rem;
+}

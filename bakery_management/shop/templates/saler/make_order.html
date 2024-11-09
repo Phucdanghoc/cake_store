@@ -1,0 +1,46 @@
+{% extends 'saler/base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/saler/make_order.css' %}">
+<div class="order-container row">
+    <div class="col-md-7 order-selection card p-3">
+        <div class="product-search mb-3">
+            <input type="text" class="form-control" placeholder="Search product..." id="productSearch" />
+            <div class="product-search-wrapper">
+                <table class="table table-striped mt-2">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Loại Bánh</th>
+                            <th>Hương Vị</th>
+                            <th>Giá</th>
+                            <th>Còn Hàng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Product rows will be added dynamically here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Right Column: Order Summary -->
+    <div class="col-md-4 order-summary card p-3">
+        <h5 class="card-title">Order Summary</h5>
+        <div class="selected-products mb-3" style="max-height: 300px; overflow-y: auto;">
+            <!-- Product items will be dynamically added here -->
+        </div>
+    
+        <div class="card total-card">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <h5>Total: 0 VND</h5>
+                <button id="paymentBtn" class="btn btn-primary" onclick="handlePayment()">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script src="{% static 'js/make_order.js' %}"></script>
+{% endblock %}

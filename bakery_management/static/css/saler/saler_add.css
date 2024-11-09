@@ -1,0 +1,82 @@
+.container {
+  margin-top: 50px;
+}
+.card {
+  background-image: linear-gradient(135deg, #5dbcd2, #4caf50); /* Soft gradient from blue to green */
+  color: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+  font-size: 1.6rem;
+  font-weight: bold;
+  border-bottom: none;
+}
+.form-group label {
+  font-weight: bold;
+  color: #e0f7fa;
+}
+.form-control {
+  border-radius: 5px;
+  border-color: #ced4da;
+  padding: 10px;
+  background-color: #ffffff;
+  color: #495057;
+}
+.form-control:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+.invalid-feedback {
+  font-size: 0.85rem;
+  color: #ff6b6b;
+}
+.btn-primary {
+  background-color: #4caf50;
+  font-size: 1.1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  width: 45%;
+}
+.btn-secondary, .btn-warning {
+  font-size: 1.1rem;
+  padding: 10px 20px;
+  border-radius: 5px;
+  width: 45%;
+}
+
+.btn-primary:hover {
+  background-color: #388e3c;
+}
+.d-flex {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+img.preview {
+  margin-top: 10px;
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+}
+.form-check-input {
+  margin-top: 10px;
+}
+.form-group img.preview {
+  display: block;
+  margin-top: 10px;
+}
+#id_availability {
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+@media (max-width: 576px) {
+  .btn-primary, .btn-secondary, .btn-warning {
+      width: 100%;
+  }
+  .form-row {
+      flex-direction: column;
+  }
+}

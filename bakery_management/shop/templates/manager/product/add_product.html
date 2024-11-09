@@ -1,0 +1,150 @@
+{% extends 'manager/base.html' %}
+{% load custom_filters %}
+{% block title %}Thêm Sản Phẩm{% endblock %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manager/product_add.css' %}">
+
+<div class="container">
+    <div class="card">
+        <h2 class="text-white text-center">
+            Thêm Sản Phẩm
+        </h2>
+        <div class="mb-2">
+            <div class="row align-items-center">
+                <form method="POST" enctype="multipart/form-data" class="d-inline" action="{% url 'add_product_excel' %}">
+                    {% csrf_token %}
+                    {{ excel_form.as_p }}
+                    <button type="submit" name="submit_excel" class="btn btn-success btn-sm">Nhập Excel</button>
+                </form>
+            </div>
+        </div>
+        <form method="POST" action="{% url 'add_product' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col-md-6">
+       
+                    <div class="form-group">
+                        <label for="name">Tên sản phẩm</label>
+                        {{ form.name|add_class:"form-control" }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Giá -->
+                    <div class="form-group">
+                        <label for="price">Giá</label>
+                        {{ form.price|add_class:"form-control" }}
+                        {% if form.price.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.price.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Danh mục và hương vị -->
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="category">Danh mục</label>
+                            <select class="form-control" name="category" id="category">
+                                <option value="Bánh Ngọt" {% if form.category.value == 'Bánh Ngọt' %}selected{% endif %}>Bánh Ngọt</option>
+                                <option value="Bánh Sinh Nhật" {% if form.category.value == 'Bánh Sinh Nhật' %}selected{% endif %}>Bánh Sinh Nhật</option>
+                                <option value="Bánh Mặn" {% if form.category.value == 'Bánh Mặn' %}selected{% endif %}>Bánh Mặn</option>
+                                <option value="Bánh Quy" {% if form.category.value == 'Bánh Quy' %}selected{% endif %}>Bánh Quy</option>
+                                <option value="Bánh Kem" {% if form.category.value == 'Bánh Kem' %}selected{% endif %}>Bánh Kem</option>
+                            </select>
+                        </div>
+                    
+                        <div class="col-md-4">
+                            <label for="flavor">Hương Vị</label>
+                            <select class="form-control" name="flavor" id="flavor">
+                                <option value="Vanilla" {% if form.flavor.value == 'Vanilla' %}selected{% endif %}>Vani</option>
+                                <option value="Chocolate" {% if form.flavor.value == 'Chocolate' %}selected{% endif %}>Sô cô la</option>
+                                <option value="Strawberry" {% if form.flavor.value == 'Strawberry' %}selected{% endif %}>Dâu tây</option>
+                                <option value="Matcha" {% if form.flavor.value == 'Matcha' %}selected{% endif %}>Matcha</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="size">Size</label>
+                            <select class="form-control" name="size" id="size">
+                                <option value="Small" {% if form.size.value == 'Small' %}selected{% endif %}>Nhỏ</option>
+                                <option value="Medium" {% if form.size.value == 'Medium' %}selected{% endif %}>Trung</option>
+                                <option value="Large" {% if form.size.value == 'Large' %}selected{% endif %}>Lớn</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview hình ảnh -->
+                    <div class="form-group" id="image_preview_container" style="display: none;">
+                        <img id="image_preview" class="preview" src="" alt="Image Preview">
+                    </div>
+                </div>
+
+                <!-- Cột phải -->
+                <div class="col-md-6">
+                    <!-- Mô tả -->
+                    <div class="form-group">
+                        <label for="description" class="small">Mô tả</label>
+                        {{ form.description|add_class:"form-control form-control-sm" }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- URL Ảnh -->
+                    <div class="form-group">
+                        <label for="image_url">URL Ảnh</label>
+                        <input type="text" class="form-control" id="image_url" name="image_url" onchange="previewImage()" value="{{ form.image_url.value }}">
+                    </div>
+
+                    <!-- Tình trạng -->
+                    <div class="form-group">
+                        <label for="availability">Còn hàng</label>
+                        {{ form.availability|add_class:"form-check-input" }}
+                    </div>
+
+                    <!-- Thêm 3 nút ở bên phải -->
+                    <div class="mt-3 d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary btn-sm">Lưu Sản Phẩm</button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm text-white">Quay lại</a>
+                        <button type="reset" class="btn btn-warning btn-sm text-white">Làm mới</button>
+                    </div>
+                </div>
+            </div>
+
+     
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        window.previewImage = function() {
+            var imageUrl = document.getElementById('image_url').value;
+            var previewContainer = document.getElementById('image_preview_container');
+            var previewImage = document.getElementById('image_preview');
+            var img = new Image();
+            img.onload = function() {
+                previewImage.src = imageUrl;
+                previewContainer.style.display = 'block';
+            }
+            img.onerror = function() {
+                previewContainer.style.display = 'none';
+            }
+            img.src = imageUrl;
+        }
+    });
+</script>
+
+{% endblock %}

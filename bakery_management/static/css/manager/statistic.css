@@ -1,0 +1,100 @@
+/* General container and layout */
+.container {
+    padding: 20px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.card-text {
+    font-size: 1.125rem;
+    color: #555;
+}
+
+/* Cards for employee, orders, and revenue statistics */
+.col-md-4 {
+    width: 30%;
+    padding: 10px;
+}
+
+.card-body h5 {
+    margin-bottom: 15px;
+}
+
+.card-body p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Styling the pie chart container */
+#orderStatusChart {
+    width: 100%;
+    height: 400px;
+}
+
+/* Add responsiveness for smaller screens */
+@media (max-width: 768px) {
+    .col-md-4 {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    #orderStatusChart {
+        height: 300px;
+    }
+}
+
+/* Card title for chart */
+.card .card-body h5 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Styling the cards' hover effect */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Loading spinner for cards (optional) */
+.card-text {
+    font-size: 1rem;
+    color: #999;
+}
+
+.card .card-body p#total-salers,
+.card .card-body p#total-orders,
+.card .card-body p#total-revenue {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #2c3e50;
+}
+
+/* Title styling for charts */
+.card-body h5 {
+    font-size: 1.25rem;
+    color: #34495e;
+}

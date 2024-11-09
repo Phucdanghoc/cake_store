@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('{% static "images/background.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid white;
+        }
+        .card-header {
+            background-color: transparent;
+            border-bottom: none;
+        }
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 1px solid white;
+            border-radius: 10px;
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .btn {
+            border-radius: 10px;
+        }
+    </style>
+    <title>Đăng Nhập</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h2 style="color: white;">Đăng Nhập</h2> <!-- Chữ màu trắng -->
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="username" style="color: white;">Tên đăng nhập:</label> <!-- Chữ màu trắng -->
+                                <input type="text" id="username" name="username" class="form-control" placeholder="Nhập tên đăng nhập" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password" style="color: white;">Mật khẩu:</label> <!-- Chữ màu trắng -->
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Đăng Nhập</button>
+                        </form>
+
+                        <!-- Hiển thị thông điệp lỗi -->
+                        {% if messages %}
+                            <ul class="mt-3">
+                                {% for message in messages %}
+                                    <li class="text-danger">{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

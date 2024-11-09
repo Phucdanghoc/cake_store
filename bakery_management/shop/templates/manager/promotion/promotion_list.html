@@ -1,0 +1,104 @@
+{% extends 'manager/base.html' %}
+{% load static %}
+{% block title %}Danh Sách Khuyến Mãi{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/promotion/promotion_list.css' %}">
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="text-center mb-4 text-dark">Danh Sách Khuyến Mãi</h2>
+
+            <!-- Thanh tìm kiếm -->
+            <div class="mb-3">
+                <form method="GET" class="d-flex justify-content-between">
+                    <div class="d-flex w-100">
+                        <input type="text" name="search" class="form-control ms-1" placeholder="Tìm kiếm khuyến mãi..." value="{{ request.GET.search }}" style="flex: 8;">
+                        <button type="submit" class="btn btn-danger ml-4" style="flex: 2;">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Nút thêm khuyến mãi -->
+            <div class="text-end mb-3">
+                <a href="{% url 'promotion_create' %}" class="btn btn-success">Thêm Khuyến Mãi</a>
+            </div>
+
+            <!-- Bảng khuyến mãi -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>Tên Khuyến Mãi</th>
+                            <th>Loại Giảm Giá</th>
+                            <th>Giá Trị Giảm</th>
+                            <th>Ngày Bắt Đầu</th>
+                            <th>Ngày Kết Thúc</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for promotion in promotions %}
+                            <tr>
+                                <td>{{ promotion.name }}</td>
+                                <td>{{ promotion.get_discount_type_display }}</td>
+                                <td>{{ promotion.discount_value }}</td>
+                                <td>{{ promotion.start_date|date:"d/m/Y" }}</td>
+                                <td>{{ promotion.end_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'promotion_update' promotion.id %}" class="btn btn-warning btn-sm">Sửa</a>
+                                    <a href="{% url 'promotion_delete' promotion.id %}" class="btn btn-danger btn-sm">Xóa</a>
+                                    {% comment %} <a href="{% url 'promotion_detail' promotion.id %}" class="btn btn-info btn-sm">Chi Tiết</a> {% endcomment %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Không có khuyến mãi nào.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if promotions.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ promotions.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Trang {{ promotions.number }} / {{ promotions.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if promotions.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ promotions.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>  
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ promotions.paginator.num_pages }}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,339 @@
+{% extends 'manager/base.html' %}
+{% load static %}
+{% block title %}Thống Kê{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/statistic/statistic.css' %}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Additional Custom Styles -->
+<style>
+    .container {
+        padding: 20px;
+    }
+    .card {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        background-color: #f9f9f9;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .card-body {
+        padding: 25px;
+    }
+    .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    .card-text {
+        font-size: 1.2rem;
+        color: #555;
+        font-weight: bold;
+    }
+    .form-control {
+        border-radius: 5px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    .btn-group .btn {
+        border-radius: 5px;
+        padding: 10px 20px;
+        margin-right: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    .btn-primary, .btn-success {
+        transition: background-color 0.3s, transform 0.2s;
+    }
+    .btn-primary:hover, .btn-success:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    canvas {
+        max-height: 400px;
+        max-width: 100%;
+        margin-top: 20px;
+    }
+
+
+</style>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Card thống kê số nhân viên -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng Doanh Thu</h5>
+                    <p class="card-text" id="total-salers">Đang tải...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card thống kê số đơn hàng -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng Số Đơn Hàng </h5>
+                    <p class="card-text" id="total-orders">Đang tải...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Range Picker Row -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <label for="from-date-picker">Từ Ngày:</label>
+            <input type="text" id="from-date-picker" class="form-control" placeholder="Từ Ngày" />
+        </div>
+        <div class="col-md-2">
+            <label for="to-date-picker">Đến Ngày:</label>
+            <input type="text" id="to-date-picker" class="form-control" placeholder="Đến Ngày" />
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary" id="btn-fetch-data">Lấy Thống Kê</button>
+            <button type="button" class="btn btn-success" id="btn-export-excel">Xuất File Excel</button>
+        </div>        
+        <div class="col-md-6">
+            <label for="quick-select">Chọn Ngày:</label>
+            <div class="btn-group" role="group" aria-label="Quick Date Select">
+                <button type="button" class="btn btn-secondary" id="btn-today">Hôm Nay</button>
+                <button type="button" class="btn btn-secondary" id="btn-this-week">Tuần Này</button>
+                <button type="button" class="btn btn-secondary" id="btn-this-month">Tháng Này</button>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Row for Pie and Line charts -->
+    <div class="row">
+        <!-- Pie Chart for order status -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Số Lượng Đơn Hàng Theo Trạng Thái</h5>
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Chart for revenue over time -->
+        <div class="col-md-9 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Doanh Thu Theo Thời Gian</h5>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let orderStatusChartInstance = null;
+        let revenueChartInstance = null;
+        async function fetchStatistics(fromDate = '', toDate = '') {
+            try {
+                let url = `/api/statistics/order_from_to/`;
+                if (fromDate && toDate) {
+                    url += `?start_date=${fromDate}&end_date=${toDate}`;
+                }
+                const totalResponse = await fetch(url);
+                const totalData = await totalResponse.json();
+
+                const totalSalers = document.getElementById('total-salers');
+                const totalOrders = document.getElementById('total-orders');
+                if (totalSalers && totalOrders) {
+                    totalSalers.innerText = totalData.total_sales
+                        ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalData.total_sales)
+                        : "N/A";
+                    totalOrders.innerText = totalData.total_orders || "N/A";
+                }
+
+                const statusResponse = await fetch('/api/statistics/order_status/');
+                const statusData = await statusResponse.json();
+
+                // Destroy previous order status chart instance if it exists
+                if (orderStatusChartInstance) {
+                    orderStatusChartInstance.destroy();
+                }
+
+                // Order Status Pie Chart
+                if (statusData && statusData.orders_by_status) {
+                    const orderStatusData = {
+                        labels: statusData.orders_by_status.map(status => status.status),
+                        datasets: [{
+                            data: statusData.orders_by_status.map(status => status.total_orders),
+                            backgroundColor: ['rgb(75, 192, 192)', 'rgb(255, 159, 64)', 'rgb(153, 102, 255)', 'rgb(255, 99, 132)'],
+                            borderColor: ['rgb(75, 192, 192)', 'rgb(255, 159, 64)', 'rgb(153, 102, 255)', 'rgb(255, 99, 132)'],
+                            borderWidth: 1
+                        }]
+                    };
+
+                    const orderStatusOptions = {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Tình Trạng Đơn Hàng' }
+                        }
+                    };
+
+                    const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+                    orderStatusChartInstance = new Chart(orderStatusCtx, {
+                        type: 'pie',
+                        data: orderStatusData,
+                        options: orderStatusOptions
+                    });
+                }
+
+                // Destroy previous revenue chart instance if it exists
+                if (revenueChartInstance) {
+                    revenueChartInstance.destroy();
+                }
+
+                // Revenue Line Chart
+                const revenueData = {
+                    labels: totalData.dates,
+                    datasets: [{
+                        label: 'Doanh Thu',
+                        data: totalData.total_sales,
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                };
+
+                const revenueOptions = {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Doanh Thu Theo Thời Gian'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Ngày' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Doanh Thu' }
+                        }
+                    }
+                };
+
+                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+                revenueChartInstance = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: revenueData,
+                    options: revenueOptions
+                });
+
+            } catch (error) {
+                console.error('Error fetching statistics:', error);
+            }
+        }
+
+    
+        // Gọi API khi trang được tải
+        fetchStatistics();
+    
+        // Initialize Flatpickr for date pickers
+        flatpickr("#from-date-picker", { dateFormat: "Y-m-d" });
+        flatpickr("#to-date-picker", { dateFormat: "Y-m-d" });
+    
+        // Button click handlers for Today, This Week, and This Month
+        document.getElementById('btn-today').addEventListener('click', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('from-date-picker').value = today;
+            document.getElementById('to-date-picker').value = today;
+            fetchStatistics(today, today);
+        });
+    
+        document.getElementById('btn-this-week').addEventListener('click', function() {
+            const startOfWeek = new Date();
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+            const endOfWeek = new Date();
+            endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
+            const fromDate = startOfWeek.toISOString().split('T')[0];
+            const toDate = endOfWeek.toISOString().split('T')[0];
+            document.getElementById('from-date-picker').value = fromDate;
+            document.getElementById('to-date-picker').value = toDate;
+            fetchStatistics(fromDate, toDate);
+        });
+    
+        document.getElementById('btn-this-month').addEventListener('click', function() {
+            const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+            const fromDate = startOfMonth.toISOString().split('T')[0];
+            const toDate = endOfMonth.toISOString().split('T')[0];
+            document.getElementById('from-date-picker').value = fromDate;
+            document.getElementById('to-date-picker').value = toDate;
+            fetchStatistics(fromDate, toDate);
+        });
+        document.getElementById('btn-fetch-data').addEventListener('click', function() {
+            const fromDate = document.getElementById('from-date-picker').value;
+            const toDate = document.getElementById('to-date-picker').value;
+            if (fromDate && toDate) {
+                fetchStatistics(fromDate, toDate);
+            } else {
+                alert("Vui lòng chọn cả Từ Ngày và Đến Ngày.");
+            }
+        });
+    
+        // Nút "Xuất File Excel"
+        document.getElementById('btn-export-excel').addEventListener('click', async function() {
+            try {
+                const fromDate = document.getElementById('from-date-picker').value;
+                const toDate = document.getElementById('to-date-picker').value;
+                let url = `/api/statistics/export_excel/`;
+                if (fromDate && toDate) {
+                    url += `?start_date=${fromDate}&end_date=${toDate}`;
+                }
+                const response = await fetch(url);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'thong_ke.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert("Xuất file Excel thất bại. Vui lòng thử lại sau.");
+                }
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+            }
+        });
+    });
+    
+</script>
+
+{% endblock %}

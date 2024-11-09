@@ -1,0 +1,159 @@
+{% extends 'saler/base.html' %}
+{% load static %}
+
+{% block title %}Danh Sách Sản Phẩm{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/manager/product_list.css' %}">
+<style>
+    .availability-checkbox {
+        transform: scale(1.5); 
+        -webkit-appearance: none; 
+        -moz-appearance: none; 
+        appearance: none; 
+        width: 30px; 
+        height: 30px; 
+        border: 2px solid #ddd; 
+        border-radius: 5px; 
+        background-color: #fff; 
+        cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s; 
+    }
+    .availability-checkbox:checked {
+        background-color: #28a745; 
+        border-color: #28a745; 
+    }
+    .availability-checkbox:checked::after {
+        content: '\2714'; 
+        color: white; 
+        font-size: 20px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="text-center mb-4 text-dark">Danh Sách Sản Phẩm</h2>
+
+            <!-- Thanh tìm kiếm -->
+            <div class="mb-3">
+                <form method="GET" class="d-flex justify-content-between">
+                    <div class="d-flex w-100">
+                        <input type="text" name="search" class="form-control ms-1" placeholder="Tìm kiếm sản phẩm..." value="{{ request.GET.search }}" style="flex: 8;">
+                        <button type="submit" class="btn btn-danger ml-4" style="flex: 2;">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng sản phẩm -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Loại Bánh</th>
+                            <th>Hương Vị</th>
+                            <th>Giá</th>
+                            <th>Còn Hàng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td><img src="{{ product.image_url }}" alt="{{ product.name }}" class="img-fluid" style="max-width: 100px;"></td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>{{ product.flavor }}</td>
+                                <td>{{ product.price }} VNĐ</td>
+                                <td>
+                                    <input type="checkbox" class="availability-checkbox" data-id="{{ product.id }}" {% if product.availability %}checked{% endif %}>
+                                </td>
+                              
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">Không có sản phẩm nào.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if products.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Trang {{ products.number }} / {{ products.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if products.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.paginator.num_pages }}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.availability-checkbox');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const productId = this.getAttribute('data-id');
+                const isChecked = this.checked;
+                fetch(`/api/product/availability/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({ availability: isChecked }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.detail === 'Product availability updated') {
+                        alert('Cập nhật thành công!');
+                    } else {
+                        alert('Lỗi cập nhật trạng thái sản phẩm.');
+                    }
+                });
+            });
+        });
+        function getCsrfToken() {
+            const csrfTokenCookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+            return csrfTokenCookie ? csrfTokenCookie.split('=')[1] : null;
+        }
+        
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}Trang Bán Hàng{% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/manager/manager_base.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use the full version of jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <img src="{% static 'images/logocake.webp' %}" alt="Logo" class="logo">
+        <h2>Trang Bán Hàng</h2>
+        <p>Chào mừng, {{ user.username }}!</p>
+        <div class="d-flex flex-column w-100">
+            <!-- Update links to match Saler roles -->
+            <a href="{% url 'saler_dashboard' %}" class="button-link">Trang Chủ</a>
+            <a href="{% url 'saler_product' %}" class="button-link">Bánh</a>
+            <a href="{% url 'saler_profile' %}" class="button-link">Hồ Sơ</a>
+            <a href="{% url 'saler_order' %}" class="button-link">Đơn Hàng</a>
+            <a href="{% url 'logout' %}" class="button-link">Đăng Xuất</a>
+        </div>
+    </div>
+    <div class="main-content" id="mainContent">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+            <div class="alert alert-success">
+                <p>{{ message }}</p>
+                <button class="alert-dismiss" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+        {% elif message.tags == 'error' %}
+            <div class="alert alert-danger">
+                <p>{{ message }}</p>
+                <button class="alert-dismiss" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+        {% elif message.tags == 'warning' %}
+            <div class="alert alert-warning">
+                <p>{{ message }}</p>
+                <button class="alert-dismiss" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+        {% elif message.tags == 'info' %}
+            <div class="alert alert-info">
+                <p>{{ message }}</p>
+                <button class="alert-dismiss" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.opacity = '0';
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 500);
+                }, 5000); 
+            });
+        });
+    </script>
+</body>
+</html>

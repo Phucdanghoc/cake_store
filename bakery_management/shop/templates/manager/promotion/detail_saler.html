@@ -1,0 +1,87 @@
+{% extends 'manager/base.html' %}
+{% load static %}
+{% block title %}Chi tiết Nhân Viên Bán Hàng{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/saler/saler_detail.css' %}">
+<div class="container">
+    <!-- Title Section -->
+    <div class="text-center mb-4 pt-4">
+        <h3>Chi tiết Nhân Viên Bán Hàng</h3>
+    </div>
+
+    <!-- Employee Info Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <!-- Employee Info Section -->
+            <div class="row align-items-center">
+                <!-- Left Section (Employee Info) -->
+                <div class="col-md-8 text-light">
+                    <p><strong>Họ và Tên:</strong> {{ saler.first_name }} {{ saler.last_name }}</p>
+                    <p><strong>Chức vụ:</strong> Nhân viên bán hàng</p>
+                    <p><strong>Tài Khoản:</strong> {{ saler.username }}</p>
+                    <p><strong>Email:</strong> {{ saler.email }}</p>
+                </div>
+                
+                <!-- Right Section (Buttons) -->
+                <div class="col-md-4 text-md-end text-light">
+                    <form method="POST" action="{% url 'saler_reset_password' saler.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm">Đặt Lại Mật Khẩu</button>
+                    </form>
+                    <a href="{% url 'saler_list' %}" class="btn btn-back btn-sm mt-3">Quay Lại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <!-- Orders Section -->
+            <div class="mt-4">
+                <h5 class="text-center">Danh Sách Đơn Hàng</h5>
+                <form method="GET" class="d-flex justify-content-center mb-3 align-items-center">
+                    <label for="date_filter" class="mr-2 mb-0">Lọc theo Ngày:</label>
+                    <input type="date" id="date_filter" name="date" class="form-control form-control-sm w-auto">
+                    <button type="submit" class="btn btn-primary btn-sm ml-2">Lọc</button>
+                </form>
+                
+
+                <!-- Orders Table -->
+                <div class="table-container">
+                    {% if orders %}
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Mã Đơn Hàng</th>
+                                    <th>Sản Phẩm</th>
+                                    <th>Số Lượng</th>
+                                    <th>Tình Trạng</th>
+                                    <th>Ngày Đặt</th>
+                                    <th>Ngày Giao</th>
+                                    <th>Thành Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-light">
+                                {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.product.name }}</td>
+                                    <td>{{ order.quantity }}</td>
+                                    <td>{{ order.get_status_display }}</td>
+                                    <td>{{ order.order_date|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ order.delivery_date|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ order.total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Không có đơn hàng nào.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
